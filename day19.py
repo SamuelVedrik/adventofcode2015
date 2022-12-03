@@ -53,6 +53,26 @@ def bfs(start, replacements, end):
                     heapq.heappush(heap, (curr_cost + 1, item))
                     node_costs[item] = curr_cost + 1
                     
+def astar(start, replacements, end):
+    heap = []
+    node_costs = defaultdict(lambda: float("inf"))
+    heapq.heappush(heap, (len(start), 0, start))
+    with tqdm() as pbar:
+        while heap:
+            pbar.update(1)
+            curr_cost, curr_steps, current = heapq.heappop(heap)
+            if curr_cost > node_costs[current]:
+                print("skipping")
+                continue
+            if current == end:
+                return curr_steps
+            new_nodes = get_all_molecules(current, replacements)
+            for item in new_nodes:
+                if curr_cost + 1 < node_costs[item]:
+                    heapq.heappush(heap, (len(item)+curr_steps+1, curr_steps+1, item))
+                    node_costs[item] = len(item)+curr_steps+1
+    
+                    
 def probabilistic_guessing(start, replacements, end):
     
     target = start
@@ -81,8 +101,7 @@ if __name__ == "__main__":
         inputs = f.read().splitlines()
     replacements = parse_inputs(inputs)
     replacements_r = [(val, key) for key, val in replacements]
-    # print(bfs(ORI_STRING, replacements_r, "e"))
-    print(probabilistic_guessing(ORI_STRING, replacements_r, "e"))
+    print(astar(ORI_STRING, replacements_r, "e"))
 
         
     
